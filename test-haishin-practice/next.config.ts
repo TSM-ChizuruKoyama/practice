@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  /* Next.jsアプリケーションを独立して動作させるためのモード */
+
   output: "standalone",
 };
 

@@ -1,18 +1,27 @@
+# nodeのDockerイメージ 超軽量、イメージサイズを小さくしたいならこのイメージを選択する。
 FROM node:22-alpine AS base
 
 # Install dependencies only when needed
+# baseステージを参照したdepsというビルドのステージ
 FROM base AS deps
 # Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
+# 超軽量が故に、入っていないパッケージもあるのでDockerfileで自分でカスタムする
 RUN apk add --no-cache libc6-compat
+
+# 作業ディレクトリを指定
 WORKDIR /app
 
 # Install dependencies based on the preferred package manager
+# 依存関係をインストールするためにpackage.jsonとpackage-lock.jsonファイルをコピーします。
 COPY package.json package-lock.json* ./
+# npm ciコマンドを使用して、package-lock.jsonに基づいてインストール
 RUN npm ci
 
 # Rebuild the source code only when needed
+# baseステージを参照したbuilderというビルドのステージ
 FROM base AS builder
 WORKDIR /app
+# 依存関係をインストールするためにファイルをコピーします。
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
@@ -20,10 +29,13 @@ COPY . .
 # Next.js collects completely anonymous telemetry data about general usage.
 # Learn more here: https://nextjs.org/telemetry
 # Uncomment the following line in case you want to disable telemetry during the build.
+# アプリケーションの使用状況に関する匿名のデータを Next.js チームに送信しないようにする
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# 全体をビルドする
 RUN npm run build
 
+# baseステージを参照した本番用のビルドのステージ
 # Production image, copy all the files and run next
 FROM base AS runner
 WORKDIR /app
@@ -50,6 +62,7 @@ EXPOSE 3000
 
 ENV PORT=3000
 
+# Next.jsのスタンドアロンモードでアプリケーションを実行するために必要な設定を行っており、server.jsファイルをnodeコマンドで実行することで、アプリケーションがサーバーとして立ち上がる
 # server.js is created by next build from the standalone output
 # https://nextjs.org/docs/pages/api-reference/next-config-js/output
 ENV HOSTNAME="0.0.0.0"
