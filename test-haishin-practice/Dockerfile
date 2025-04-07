@@ -1,4 +1,3 @@
-# @@ -0,0 +1,56 @@
 FROM node:22-alpine AS base
 
 # Install dependencies only when needed
