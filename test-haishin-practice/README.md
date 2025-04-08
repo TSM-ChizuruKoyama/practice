@@ -14,8 +14,8 @@ npm run dev
 
 ```bash
 # イメージをビルドする
-docker build -t tosho-dtc-adminportal .
+docker build -t test-haishin-practice .
 
 # コンテナとして起動する
-docker run -p 3000:3000 tosho-dtc-adminportal
+docker run -p 3000:3000 test-haishin-practice
 ```
